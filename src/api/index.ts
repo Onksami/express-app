@@ -1,6 +1,8 @@
 import { Router } from "express";
 
-import todosRouter from "./todos";
+import usersRouter from "./users";
+import productsRouter from "./products";
+import companiesRouter from "./companies";
 
 const router = Router();
 
@@ -10,6 +12,8 @@ router.get("/", async (req, res) => {
   });
 });
 
-router.use("/todos", todosRouter);
+router.use("/users", usersRouter);
+router.use("/products", productsRouter);
+router.use("/companies", companiesRouter);
 
 export default router;

@@ -1,8 +1,6 @@
 # Node modules
 node_modules/
 
-# Built output
-dist/
 
 # Environment variables
 .env
@@ -16,7 +14,6 @@ logs/
 *.log
 
 # Dependency lock files
-package-lock.json
 yarn.lock
 
 # Typescript build artifacts
@@ -37,3 +34,4 @@ coverage/
 # Windows specific files
 Thumbs.db
 Desktop.ini
+src/api/products/db.json

@@ -16,6 +16,10 @@ const environmentSchema = z.object(
       required_error: "DATABASE_URL is required",
       invalid_type_error: "DATABASE_URL must be a string",
     }),
+    JWT_SECRET: z.string({
+      required_error: "JWT_SECRET is required",
+      invalid_type_error: "JWT_SECRET must be a string",
+    }),
   },
   {
     required_error: "Environment was not found",
