@@ -86,12 +86,12 @@ function readData() {
     }
     catch (error) {
         console.error("Error reading data from db.json:", error);
-        return { users: [] }; // Return empty data or handle error as needed
+        return null;
     }
 }
 router.post("/import-data", async (req, res) => {
     const data = readData();
-    const products = data.products;
+    const products = data.items;
     const seenSlugsP = {};
     const uniqueItemsP = [];
     for (const item of products) {

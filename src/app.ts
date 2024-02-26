@@ -20,7 +20,7 @@ app.use(express.json());
 
 app.get<{}, {}, { message: string }>("/", async (_req, res) => {
   res.json({
-    message: "Hello World!",
+    message: "Hello!",
   });
 });
 

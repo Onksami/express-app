@@ -4,6 +4,7 @@ exports.users = exports.tag = exports.itemType = exports.company = exports.produ
 const pg_core_1 = require("drizzle-orm/pg-core");
 exports.product = (0, pg_core_1.pgTable)("product", {
     id: (0, pg_core_1.uuid)("id").notNull().primaryKey().defaultRandom(),
+    price: (0, pg_core_1.real)("price").notNull(),
     name: (0, pg_core_1.text)("name").notNull(),
     slug: (0, pg_core_1.text)("slug").notNull().unique(),
     description: (0, pg_core_1.text)("description").notNull(),
