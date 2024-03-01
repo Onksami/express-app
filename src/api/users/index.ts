@@ -4,7 +4,7 @@ import { Response, Router } from "express";
 import * as schema from "../../db/schema";
 import { eq } from "drizzle-orm";
 import jwt from "jsonwebtoken";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import { genUniqId } from "../../utils/common";
 
 let clients: any = [];
@@ -24,15 +24,38 @@ router.get("/", async (req, res) => {
   });
 });
 
+router.get<{
+  id: string;
+}>("/:id", async (req, res, next) => {
+  const { id } = req.params;
+
+  try {
+    const user = await dbClient()
+      .select()
+      .from(schema.users)
+      .where(eq(schema.users.id, id));
+
+    const { password, ...userData } = user[0];
+    res.json({
+      data: userData,
+    });
+  } catch (err) {
+    res.status(500);
+    return next(err);
+  }
+});
+
 router.post<
   {},
   {},
   {
     email: string;
     password: string;
+    name: string;
+    surName: string;
   }
 >("/sign-up", async (req, res, next) => {
-  const { email, password } = req.body;
+  const { email, password, name, surName } = req.body;
 
   const user = await dbClient()
     .select()
@@ -52,19 +75,23 @@ router.post<
       .values({
         email,
         password: hashedPassword,
+        firstName: name,
+        lastName: surName,
       })
       .returning({
         id: schema.users.id,
         email: schema.users.email,
+        firstname: schema.users.firstName,
+        lastName: schema.users.lastName,
       });
 
-    newUser = [{ id: user[0].id, text: email, checked: false }, ...newUser];
-    sendToAllUsers();
+    // newUser = [{ id: user[0].id, text: email, checked: false }, ...newUser];
+    // sendToAllUsers();
 
     const token = jwt.sign({ email }, process.env.JWT_SECRET);
 
     res.json({
-      user,
+      user: user[0],
       token,
     });
   } catch (err) {

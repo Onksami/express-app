@@ -31,7 +31,7 @@ const express_1 = require("express");
 const schema = __importStar(require("../../db/schema"));
 const drizzle_orm_1 = require("drizzle-orm");
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
-const bcrypt_1 = __importDefault(require("bcrypt"));
+const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const common_1 = require("../../utils/common");
 let clients = [];
 let newUser = [];
@@ -46,8 +46,25 @@ router.get("/", async (req, res) => {
         data: users,
     });
 });
+router.get("/:id", async (req, res, next) => {
+    const { id } = req.params;
+    try {
+        const user = await (0, db_client_1.default)()
+            .select()
+            .from(schema.users)
+            .where((0, drizzle_orm_1.eq)(schema.users.id, id));
+        const { password, ...userData } = user[0];
+        res.json({
+            data: userData,
+        });
+    }
+    catch (err) {
+        res.status(500);
+        return next(err);
+    }
+});
 router.post("/sign-up", async (req, res, next) => {
-    const { email, password } = req.body;
+    const { email, password, name, surName } = req.body;
     const user = await (0, db_client_1.default)()
         .select()
         .from(schema.users)
@@ -57,23 +74,27 @@ router.post("/sign-up", async (req, res, next) => {
         res.status(409).json("User already exists");
         return;
     }
-    const hashedPassword = await bcrypt_1.default.hash(password, 10);
+    const hashedPassword = await bcryptjs_1.default.hash(password, 10);
     try {
         const user = await (0, db_client_1.default)()
             .insert(schema.users)
             .values({
             email,
             password: hashedPassword,
+            firstName: name,
+            lastName: surName,
         })
             .returning({
             id: schema.users.id,
             email: schema.users.email,
+            firstname: schema.users.firstName,
+            lastName: schema.users.lastName,
         });
-        newUser = [{ id: user[0].id, text: email, checked: false }, ...newUser];
-        sendToAllUsers();
+        // newUser = [{ id: user[0].id, text: email, checked: false }, ...newUser];
+        // sendToAllUsers();
         const token = jsonwebtoken_1.default.sign({ email }, process.env.JWT_SECRET);
         res.json({
-            user,
+            user: user[0],
             token,
         });
     }
@@ -93,7 +114,7 @@ router.post("/sign-in", async (req, res, next) => {
         res.status(401).json("Email or password is incorrect");
     }
     // Verify password
-    if (!(await bcrypt_1.default.compare(password, user[0].password))) {
+    if (!(await bcryptjs_1.default.compare(password, user[0].password))) {
         return res.status(401).json({ message: "Invalid username or password" });
     }
     try {

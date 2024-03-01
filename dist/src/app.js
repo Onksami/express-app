@@ -41,7 +41,7 @@ app.use((0, cors_1.default)());
 app.use(express_1.default.json());
 app.get("/", async (_req, res) => {
     res.json({
-        message: "Hello!",
+        message: "Hello from app!",
     });
 });
 app.use("/api/v1", api_1.default);

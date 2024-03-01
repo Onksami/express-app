@@ -3,6 +3,7 @@ import { Router } from "express";
 import usersRouter from "./users";
 import productsRouter from "./products";
 import companiesRouter from "./companies";
+import testRouter from "./test";
 
 const router = Router();
 
@@ -15,5 +16,6 @@ router.get("/", async (req, res) => {
 router.use("/users", usersRouter);
 router.use("/products", productsRouter);
 router.use("/companies", companiesRouter);
+router.use("/test", testRouter);
 
 export default router;
