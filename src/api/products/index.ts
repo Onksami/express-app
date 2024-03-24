@@ -68,53 +68,51 @@ function readData() {
     return JSON.parse(data);
   } catch (error) {
     console.error("Error reading data from db.json:", error);
-    return null; 
+    return null;
   }
 }
 
-router.post("/import-data", async (req, res) => {
-  const data = readData();
- 
-  
+// router.post("/import-data", async (req, res) => {
+//   const data = readData();
 
-  const products = data.items;
-  const seenSlugsP = {} as any;
-  const uniqueItemsP = [];
-  for (const item of products) {
-    if (!seenSlugsP[item.slug]) {
-      seenSlugsP[item.slug] = true;
-      item.added = new Date(item.added).toISOString();
-      uniqueItemsP.push(item);
-    }
-  }
+//   const products = data.items;
+//   const seenSlugsP = {} as any;
+//   const uniqueItemsP = [];
+//   for (const item of products) {
+//     if (!seenSlugsP[item.slug]) {
+//       seenSlugsP[item.slug] = true;
+//       item.added = new Date(item.added).toISOString();
+//       uniqueItemsP.push(item);
+//     }
+//   }
 
-  const companies = data.companies;
-  const seenSlugsC = {} as any;
-  const uniqueItemsC = [];
-  for (const item of companies) {
-    if (!seenSlugsC[item.slug]) {
-      seenSlugsC[item.slug] = true;
-      uniqueItemsC.push(item);
-    }
-  }
+//   const companies = data.companies;
+//   const seenSlugsC = {} as any;
+//   const uniqueItemsC = [];
+//   for (const item of companies) {
+//     if (!seenSlugsC[item.slug]) {
+//       seenSlugsC[item.slug] = true;
+//       uniqueItemsC.push(item);
+//     }
+//   }
 
-  const itemType = data.itemType.map((type: any) => {
-    return { type };
-  });
-  const tags = data.tags.map((tag: any) => {
-    return { tag };
-  });
-  await dbClient().insert(schema.product).values(uniqueItemsP);
+//   const itemType = data.itemType.map((type: any) => {
+//     return { type };
+//   });
+//   const tags = data.tags.map((tag: any) => {
+//     return { tag };
+//   });
+//   await dbClient().insert(schema.product).values(uniqueItemsP);
 
-  await dbClient().insert(schema.company).values(uniqueItemsC);
+//   await dbClient().insert(schema.company).values(uniqueItemsC);
 
-  await dbClient().insert(schema.itemType).values(itemType);
+//   await dbClient().insert(schema.itemType).values(itemType);
 
-  await dbClient().insert(schema.tag).values(tags);
+//   await dbClient().insert(schema.tag).values(tags);
 
-  res.json({
-    message: "data imported",
-  });
-});
+//   res.json({
+//     message: "data imported",
+//   });
+// });
 
 export default router;
