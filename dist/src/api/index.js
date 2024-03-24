@@ -10,6 +10,7 @@ const companies_1 = __importDefault(require("./companies"));
 const test_1 = __importDefault(require("./test"));
 const router = (0, express_1.Router)();
 router.get("/", async (req, res) => {
+    // #swagger.tags = ['General']
     res.json({
         message: `${req.originalUrl} api is up and running`,
     });

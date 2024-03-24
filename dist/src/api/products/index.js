@@ -89,40 +89,40 @@ function readData() {
         return null;
     }
 }
-router.post("/import-data", async (req, res) => {
-    const data = readData();
-    const products = data.items;
-    const seenSlugsP = {};
-    const uniqueItemsP = [];
-    for (const item of products) {
-        if (!seenSlugsP[item.slug]) {
-            seenSlugsP[item.slug] = true;
-            item.added = new Date(item.added).toISOString();
-            uniqueItemsP.push(item);
-        }
-    }
-    const companies = data.companies;
-    const seenSlugsC = {};
-    const uniqueItemsC = [];
-    for (const item of companies) {
-        if (!seenSlugsC[item.slug]) {
-            seenSlugsC[item.slug] = true;
-            uniqueItemsC.push(item);
-        }
-    }
-    const itemType = data.itemType.map((type) => {
-        return { type };
-    });
-    const tags = data.tags.map((tag) => {
-        return { tag };
-    });
-    await (0, db_client_1.default)().insert(schema.product).values(uniqueItemsP);
-    await (0, db_client_1.default)().insert(schema.company).values(uniqueItemsC);
-    await (0, db_client_1.default)().insert(schema.itemType).values(itemType);
-    await (0, db_client_1.default)().insert(schema.tag).values(tags);
-    res.json({
-        message: "data imported",
-    });
-});
+// router.post("/import-data", async (req, res) => {
+//   const data = readData();
+//   const products = data.items;
+//   const seenSlugsP = {} as any;
+//   const uniqueItemsP = [];
+//   for (const item of products) {
+//     if (!seenSlugsP[item.slug]) {
+//       seenSlugsP[item.slug] = true;
+//       item.added = new Date(item.added).toISOString();
+//       uniqueItemsP.push(item);
+//     }
+//   }
+//   const companies = data.companies;
+//   const seenSlugsC = {} as any;
+//   const uniqueItemsC = [];
+//   for (const item of companies) {
+//     if (!seenSlugsC[item.slug]) {
+//       seenSlugsC[item.slug] = true;
+//       uniqueItemsC.push(item);
+//     }
+//   }
+//   const itemType = data.itemType.map((type: any) => {
+//     return { type };
+//   });
+//   const tags = data.tags.map((tag: any) => {
+//     return { tag };
+//   });
+//   await dbClient().insert(schema.product).values(uniqueItemsP);
+//   await dbClient().insert(schema.company).values(uniqueItemsC);
+//   await dbClient().insert(schema.itemType).values(itemType);
+//   await dbClient().insert(schema.tag).values(tags);
+//   res.json({
+//     message: "data imported",
+//   });
+// });
 exports.default = router;
 //# sourceMappingURL=index.js.map
