@@ -6,16 +6,19 @@ import { eq } from "drizzle-orm";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import { genUniqId } from "../../utils/common";
+import { verifyToken } from "../../middlewares";
 
 let clients: any = [];
 let newUser: any = [];
+
 const router = Router();
 
 router.get("/", async (req, res) => {
+  // #swagger.tags = ['Users']
   const users = await dbClient().select().from(schema.users);
 
   if (!users) {
-    res.status(404);
+    res.status(400);
     throw new Error("users not found");
   }
 
@@ -24,14 +27,38 @@ router.get("/", async (req, res) => {
   });
 });
 
-router.get("/:id", async (req, res, next) => {
-  const { id } = req.params;
+// router.get("/:id", async (req, res, next) => {
+//   // #swagger.tags = ['Users']
+//   const { id } = req.params;
+
+//   try {
+//     const user = await dbClient()
+//       .select()
+//       .from(schema.users)
+//       .where(eq(schema.users.id, id));
+
+//     const { password, ...userData } = user[0];
+//     res.json({
+//       data: userData,
+//     });
+//   } catch (err) {
+//     res.status(500);
+//     return next(err);
+//   }
+// });
+router.get("/account", verifyToken, async (req, res, next) => {
+  // #swagger.tags = ['Users']
+  const decoded = req.decoded;
+  console.log("email", decoded);
+  const email = decoded?.email!;
+
+  // return res.json({ data: "ok" });
 
   try {
     const user = await dbClient()
       .select()
       .from(schema.users)
-      .where(eq(schema.users.id, id));
+      .where(eq(schema.users.email, email));
 
     const { password, ...userData } = user[0];
     res.json({
@@ -44,8 +71,12 @@ router.get("/:id", async (req, res, next) => {
 });
 
 router.post("/sign-up", async (req, res, next) => {
+  // #swagger.tags = ['Auth']
   const { email, password, name, surName } = req.body;
 
+  if (!email || !password) {
+    return res.status(401).json({ message: "Invalid email or password" });
+  }
   const user = await dbClient()
     .select()
     .from(schema.users)
@@ -89,7 +120,12 @@ router.post("/sign-up", async (req, res, next) => {
   }
 });
 router.post("/sign-in", async (req, res, next) => {
+  // #swagger.tags = ['Auth']
   const { email, password } = req.body;
+
+  if (!email || !password) {
+    return res.status(401).json({ message: "Invalid email or password" });
+  }
 
   const user = await dbClient()
     .select()
@@ -118,6 +154,7 @@ router.post("/sign-in", async (req, res, next) => {
 });
 
 router.put("/:id", async (req, res, next) => {
+  // #swagger.tags = ['Users']
   const { id } = req.params;
   const { firstName, lastName } = req.body;
 
@@ -143,6 +180,7 @@ router.put("/:id", async (req, res, next) => {
 });
 
 router.delete("/:id", async (req, res, next) => {
+  // #swagger.tags = ['Users']
   const { id } = req.params;
 
   try {
@@ -162,29 +200,30 @@ router.delete("/:id", async (req, res, next) => {
   }
 });
 
-// router.get("/event", function (req, res) {
-//   res.writeHead(200, {
-//     "Content-Type": "text/event-stream",
-//     "Cache-Control": "no-cache",
-//     Connection: "keep-alive",
-//   });
+router.get("/event", function (req, res) {
+  // #swagger.ignore = true
+  res.writeHead(200, {
+    "Content-Type": "text/event-stream",
+    "Cache-Control": "no-cache",
+    Connection: "keep-alive",
+  });
 
-//   const sendData = `data: ${JSON.stringify(newUser)}\n\n`;
-//   res.write(sendData);
+  const sendData = `data: ${JSON.stringify(newUser)}\n\n`;
+  res.write(sendData);
 
-//   const clientId = genUniqId();
+  const clientId = genUniqId();
 
-//   const newClient = {
-//     id: clientId,
-//     res,
-//   };
-//   clients.push(newClient);
+  const newClient = {
+    id: clientId,
+    res,
+  };
+  clients.push(newClient);
 
-//   req.on("close", () => {
-//     console.log(`${clientId} - Connection closed`);
-//     clients = clients.filter((client: any) => client.id !== clientId);
-//   });
-// });
+  req.on("close", () => {
+    console.log(`${clientId} - Connection closed`);
+    clients = clients.filter((client: any) => client.id !== clientId);
+  });
+});
 
 function sendToAllUsers() {
   for (let i = 0; i < clients.length; i++) {

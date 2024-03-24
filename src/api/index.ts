@@ -8,6 +8,7 @@ import testRouter from "./test";
 const router = Router();
 
 router.get("/", async (req, res) => {
+  // #swagger.tags = ['General']
   res.json({
     message: `${req.originalUrl} api is up and running`,
   });

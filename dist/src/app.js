@@ -33,12 +33,15 @@ const cors_1 = __importDefault(require("cors"));
 const api_1 = __importDefault(require("./api"));
 const customMiddleware = __importStar(require("./middlewares"));
 const environment_1 = require("./environment");
+const swagger_ui_express_1 = __importDefault(require("swagger-ui-express"));
+const swaggerOutput = require("./swagger/swagger-output.json");
 (0, environment_1.loadEnvIntoProcess)();
 const app = (0, express_1.default)();
 app.use((0, morgan_1.default)("dev"));
 app.use((0, helmet_1.default)());
 app.use((0, cors_1.default)());
 app.use(express_1.default.json());
+app.use("/api-docs", swagger_ui_express_1.default.serve, swagger_ui_express_1.default.setup(swaggerOutput, { explorer: true }));
 app.get("/", async (_req, res) => {
     res.json({
         message: "Hello from app!",

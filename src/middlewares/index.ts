@@ -6,6 +6,15 @@ import {
   Response,
 } from "express";
 import jwt from "jsonwebtoken";
+import { DecodedToken } from "types";
+
+declare global {
+  namespace Express {
+    interface Request {
+      decoded?: DecodedToken; // Declare the user property in the Request interface
+    }
+  }
+}
 
 export const notFoundMiddleware: RequestHandler = (req, res, next) => {
   res.status(404);
@@ -34,7 +43,7 @@ export const verifyToken = (
   res: Response,
   next: NextFunction
 ) => {
-  const token = req.headers.authorization?.split(" ")[1];
+  const token = req.headers.authorization;
 
   if (!token) {
     return res.status(401).json({ message: "Unauthorized: Missing token" });
@@ -44,7 +53,7 @@ export const verifyToken = (
     if (err) {
       return res.status(401).json({ message: "Unauthorized: Invalid token" });
     }
-    // req.user = decoded;
+    req.decoded = decoded;
     next();
   });
 };

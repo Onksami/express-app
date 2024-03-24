@@ -22,7 +22,7 @@ const errorHandlerMiddleware = (err, _req, res, _next) => {
 exports.errorHandlerMiddleware = errorHandlerMiddleware;
 // Middleware to verify JWT token
 const verifyToken = (req, res, next) => {
-    const token = req.headers.authorization?.split(" ")[1];
+    const token = req.headers.authorization;
     if (!token) {
         return res.status(401).json({ message: "Unauthorized: Missing token" });
     }
@@ -30,7 +30,7 @@ const verifyToken = (req, res, next) => {
         if (err) {
             return res.status(401).json({ message: "Unauthorized: Invalid token" });
         }
-        // req.user = decoded;
+        req.decoded = decoded;
         next();
     });
 };

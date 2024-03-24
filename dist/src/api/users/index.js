@@ -33,26 +33,49 @@ const drizzle_orm_1 = require("drizzle-orm");
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const common_1 = require("../../utils/common");
+const middlewares_1 = require("../../middlewares");
 let clients = [];
 let newUser = [];
 const router = (0, express_1.Router)();
 router.get("/", async (req, res) => {
+    // #swagger.tags = ['Users']
     const users = await (0, db_client_1.default)().select().from(schema.users);
     if (!users) {
-        res.status(404);
+        res.status(400);
         throw new Error("users not found");
     }
     res.json({
         data: users,
     });
 });
-router.get("/:id", async (req, res, next) => {
-    const { id } = req.params;
+// router.get("/:id", async (req, res, next) => {
+//   // #swagger.tags = ['Users']
+//   const { id } = req.params;
+//   try {
+//     const user = await dbClient()
+//       .select()
+//       .from(schema.users)
+//       .where(eq(schema.users.id, id));
+//     const { password, ...userData } = user[0];
+//     res.json({
+//       data: userData,
+//     });
+//   } catch (err) {
+//     res.status(500);
+//     return next(err);
+//   }
+// });
+router.get("/account", middlewares_1.verifyToken, async (req, res, next) => {
+    // #swagger.tags = ['Users']
+    const decoded = req.decoded;
+    console.log("email", decoded);
+    const email = decoded?.email;
+    // return res.json({ data: "ok" });
     try {
         const user = await (0, db_client_1.default)()
             .select()
             .from(schema.users)
-            .where((0, drizzle_orm_1.eq)(schema.users.id, id));
+            .where((0, drizzle_orm_1.eq)(schema.users.email, email));
         const { password, ...userData } = user[0];
         res.json({
             data: userData,
@@ -64,7 +87,11 @@ router.get("/:id", async (req, res, next) => {
     }
 });
 router.post("/sign-up", async (req, res, next) => {
+    // #swagger.tags = ['Auth']
     const { email, password, name, surName } = req.body;
+    if (!email || !password) {
+        return res.status(401).json({ message: "Invalid email or password" });
+    }
     const user = await (0, db_client_1.default)()
         .select()
         .from(schema.users)
@@ -104,7 +131,11 @@ router.post("/sign-up", async (req, res, next) => {
     }
 });
 router.post("/sign-in", async (req, res, next) => {
+    // #swagger.tags = ['Auth']
     const { email, password } = req.body;
+    if (!email || !password) {
+        return res.status(401).json({ message: "Invalid email or password" });
+    }
     const user = await (0, db_client_1.default)()
         .select()
         .from(schema.users)
@@ -131,6 +162,7 @@ router.post("/sign-in", async (req, res, next) => {
     }
 });
 router.put("/:id", async (req, res, next) => {
+    // #swagger.tags = ['Users']
     const { id } = req.params;
     const { firstName, lastName } = req.body;
     try {
@@ -154,6 +186,7 @@ router.put("/:id", async (req, res, next) => {
     }
 });
 router.delete("/:id", async (req, res, next) => {
+    // #swagger.tags = ['Users']
     const { id } = req.params;
     try {
         const user = await (0, db_client_1.default)()
@@ -172,6 +205,7 @@ router.delete("/:id", async (req, res, next) => {
     }
 });
 router.get("/event", function (req, res) {
+    // #swagger.ignore = true
     res.writeHead(200, {
         "Content-Type": "text/event-stream",
         "Cache-Control": "no-cache",

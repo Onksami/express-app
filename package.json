@@ -5,6 +5,7 @@
   "description": "express server",
   "main": "src/index.ts",
   "scripts": {
+    "prestart": "node dist/src/swagger/generateSwagger",
     "start": "node dist/src/index.js",
     "start:dev": "ts-node src/index.ts",
     "dev": "nodemon src/index.ts",
@@ -12,7 +13,6 @@
     "lint": "eslint --fix src test",
     "typecheck": "tsc --noEmit",
     "generate-swagger": "ts-node src/swagger/generateSwagger.ts",
-    "postbuild": "cpy --cwd=src --parents '**/*.json' ../dist/",
     "db:pull": "dotenv -e .env drizzle-kit introspect:pg",
     "db:migrations:generate": "dotenv -e .env drizzle-kit generate:pg",
     "db:migrations:drop": "dotenv -e .env drizzle-kit drop",
