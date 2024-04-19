@@ -49,7 +49,6 @@ router.get("/", async (req, res) => {
 router.get("/account", verifyToken, async (req, res, next) => {
   // #swagger.tags = ['Users']
   const decoded = req.decoded;
-  console.log("email", decoded);
   const email = decoded?.email!;
 
   // return res.json({ data: "ok" });
@@ -144,7 +143,7 @@ router.post("/sign-in", async (req, res, next) => {
     const token = jwt.sign({ email }, process.env.JWT_SECRET);
     const { password, ...userData } = user[0];
     res.json({
-      userData,
+      user: userData,
       token,
     });
   } catch (err) {
