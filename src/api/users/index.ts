@@ -89,20 +89,12 @@ router.post("/sign-up", async (req, res, next) => {
   const hashedPassword = await bcrypt.hash(password, 10);
 
   try {
-    const user = await dbClient()
-      .insert(schema.users)
-      .values({
-        email,
-        password: hashedPassword,
-        firstName: name,
-        lastName: surName,
-      })
-      .returning({
-        id: schema.users.id,
-        email: schema.users.email,
-        firstname: schema.users.firstName,
-        lastName: schema.users.lastName,
-      });
+    await dbClient().insert(schema.users).values({
+      email,
+      password: hashedPassword,
+      firstName: name,
+      lastName: surName,
+    });
 
     // newUser = [{ id: user[0].id, text: email, checked: false }, ...newUser];
     // sendToAllUsers();
@@ -110,7 +102,6 @@ router.post("/sign-up", async (req, res, next) => {
     const token = jwt.sign({ email }, process.env.JWT_SECRET);
 
     res.json({
-      user: user[0],
       token,
     });
   } catch (err) {
@@ -143,7 +134,6 @@ router.post("/sign-in", async (req, res, next) => {
     const token = jwt.sign({ email }, process.env.JWT_SECRET);
     const { password, ...userData } = user[0];
     res.json({
-      user: userData,
       token,
     });
   } catch (err) {

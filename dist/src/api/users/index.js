@@ -68,7 +68,6 @@ router.get("/", async (req, res) => {
 router.get("/account", middlewares_1.verifyToken, async (req, res, next) => {
     // #swagger.tags = ['Users']
     const decoded = req.decoded;
-    console.log("email", decoded);
     const email = decoded?.email;
     // return res.json({ data: "ok" });
     try {
@@ -103,25 +102,16 @@ router.post("/sign-up", async (req, res, next) => {
     }
     const hashedPassword = await bcryptjs_1.default.hash(password, 10);
     try {
-        const user = await (0, db_client_1.default)()
-            .insert(schema.users)
-            .values({
+        await (0, db_client_1.default)().insert(schema.users).values({
             email,
             password: hashedPassword,
             firstName: name,
             lastName: surName,
-        })
-            .returning({
-            id: schema.users.id,
-            email: schema.users.email,
-            firstname: schema.users.firstName,
-            lastName: schema.users.lastName,
         });
         // newUser = [{ id: user[0].id, text: email, checked: false }, ...newUser];
         // sendToAllUsers();
         const token = jsonwebtoken_1.default.sign({ email }, process.env.JWT_SECRET);
         res.json({
-            user: user[0],
             token,
         });
     }
@@ -152,7 +142,6 @@ router.post("/sign-in", async (req, res, next) => {
         const token = jsonwebtoken_1.default.sign({ email }, process.env.JWT_SECRET);
         const { password, ...userData } = user[0];
         res.json({
-            userData,
             token,
         });
     }

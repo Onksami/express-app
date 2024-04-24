@@ -1,10 +1,4 @@
-import {
-  integer,
-  pgTable,
-  real,
-  text,
-  uuid
-} from "drizzle-orm/pg-core";
+import { integer, pgTable, real, text, uuid } from "drizzle-orm/pg-core";
 
 export const product = pgTable("product", {
   id: uuid("id").notNull().primaryKey().defaultRandom(),
@@ -39,8 +33,8 @@ export const tag = pgTable("tag", {
 
 export const users = pgTable("users", {
   id: uuid("id").notNull().primaryKey().defaultRandom(),
-  firstName: text("title"),
-  lastName: text("description"),
+  firstName: text("firstName"),
+  lastName: text("lastName"),
   password: text("password").notNull(),
   email: text("email").notNull(),
 });

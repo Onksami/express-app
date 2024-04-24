@@ -33,8 +33,8 @@ exports.tag = (0, pg_core_1.pgTable)("tag", {
 });
 exports.users = (0, pg_core_1.pgTable)("users", {
     id: (0, pg_core_1.uuid)("id").notNull().primaryKey().defaultRandom(),
-    firstName: (0, pg_core_1.text)("title"),
-    lastName: (0, pg_core_1.text)("description"),
+    firstName: (0, pg_core_1.text)("firstName"),
+    lastName: (0, pg_core_1.text)("lastName"),
     password: (0, pg_core_1.text)("password").notNull(),
     email: (0, pg_core_1.text)("email").notNull(),
 });
