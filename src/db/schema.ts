@@ -1,4 +1,11 @@
-import { integer, pgTable, real, text, uuid } from "drizzle-orm/pg-core";
+import {
+  integer,
+  pgTable,
+  real,
+  text,
+  timestamp,
+  uuid,
+} from "drizzle-orm/pg-core";
 
 export const product = pgTable("product", {
   id: uuid("id").notNull().primaryKey().defaultRandom(),
@@ -35,7 +42,16 @@ export const users = pgTable("users", {
   id: uuid("id").notNull().primaryKey().defaultRandom(),
   firstName: text("firstName"),
   lastName: text("lastName"),
+  age: text("age"),
   password: text("password").notNull(),
   email: text("email").notNull(),
   role: text("role").default("user"),
+  country: text("country"),
+  city: text("city"),
+  phone: text("phone"),
+  status: text("status").default("active"),
+  company: text("company"),
+  profession: text("profession"),
+  createdAt: timestamp("createdAt").defaultNow(),
+  updatedAt: timestamp("updatedAt").defaultNow(),
 });

@@ -37,17 +37,6 @@ const middlewares_1 = require("../../middlewares");
 let clients = [];
 let newUser = [];
 const router = (0, express_1.Router)();
-router.get("/", async (req, res) => {
-    // #swagger.tags = ['Users']
-    const users = await (0, db_client_1.default)().select().from(schema.users);
-    if (!users) {
-        res.status(400);
-        throw new Error("users not found");
-    }
-    res.json({
-        data: users,
-    });
-});
 // router.get("/:id", async (req, res, next) => {
 //   // #swagger.tags = ['Users']
 //   const { id } = req.params;
@@ -65,26 +54,6 @@ router.get("/", async (req, res) => {
 //     return next(err);
 //   }
 // });
-router.get("/account", middlewares_1.verifyToken, async (req, res, next) => {
-    // #swagger.tags = ['Users']
-    const decoded = req.decoded;
-    const email = decoded?.email;
-    // return res.json({ data: "ok" });
-    try {
-        const user = await (0, db_client_1.default)()
-            .select()
-            .from(schema.users)
-            .where((0, drizzle_orm_1.eq)(schema.users.email, email));
-        const { password, ...userData } = user[0];
-        res.json({
-            data: userData,
-        });
-    }
-    catch (err) {
-        res.status(500);
-        return next(err);
-    }
-});
 router.post("/sign-up", async (req, res, next) => {
     // #swagger.tags = ['Auth']
     const { email, password, name, surName } = req.body;
@@ -150,9 +119,41 @@ router.post("/sign-in", async (req, res, next) => {
         return next(err);
     }
 });
-router.put("/:id", async (req, res, next) => {
+router.get("/", middlewares_1.verifyToken, middlewares_1.isAdmin, async (req, res) => {
     // #swagger.tags = ['Users']
-    const { id } = req.params;
+    const users = await (0, db_client_1.default)().select().from(schema.users);
+    if (!users) {
+        res.status(400);
+        throw new Error("users not found");
+    }
+    res.json({
+        data: users,
+    });
+});
+router.get("/account", middlewares_1.verifyToken, async (req, res, next) => {
+    // #swagger.tags = ['Users']
+    const decoded = req.decoded;
+    const email = decoded?.email;
+    // return res.json({ data: "ok" });
+    try {
+        const user = await (0, db_client_1.default)()
+            .select()
+            .from(schema.users)
+            .where((0, drizzle_orm_1.eq)(schema.users.email, email));
+        const { password, ...userData } = user[0];
+        res.json({
+            data: userData,
+        });
+    }
+    catch (err) {
+        res.status(500);
+        return next(err);
+    }
+});
+router.put("/", middlewares_1.verifyToken, async (req, res, next) => {
+    // #swagger.tags = ['Users']
+    const decoded = req.decoded;
+    const email = decoded?.email;
     const { firstName, lastName } = req.body;
     try {
         const user = await (0, db_client_1.default)()
@@ -161,12 +162,12 @@ router.put("/:id", async (req, res, next) => {
             firstName,
             lastName,
         })
-            .where((0, drizzle_orm_1.eq)(schema.users.id, id))
+            .where((0, drizzle_orm_1.eq)(schema.users.email, email))
             .returning({
             id: schema.users.id,
         });
         res.json({
-            data: user,
+            message: "user updated",
         });
     }
     catch (err) {
@@ -174,7 +175,7 @@ router.put("/:id", async (req, res, next) => {
         return next(err);
     }
 });
-router.delete("/:id", async (req, res, next) => {
+router.delete("/:id", middlewares_1.verifyToken, middlewares_1.isAdmin, async (req, res, next) => {
     // #swagger.tags = ['Users']
     const { id } = req.params;
     try {

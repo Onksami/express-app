@@ -7,6 +7,9 @@ import {
 } from "express";
 import jwt from "jsonwebtoken";
 import { DecodedToken } from "types";
+import * as schema from "../db/schema";
+import dbClient from "../db/db-client";
+import { eq } from "drizzle-orm";
 
 declare global {
   namespace Express {
@@ -56,4 +59,32 @@ export const verifyToken = (
     req.decoded = decoded;
     next();
   });
+};
+// Middleware to check if user is admin
+export const isAdmin = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    // Get user email from decoded token
+    const email = req.decoded?.email!;
+
+    // Fetch user from database based on email
+    const user = await dbClient()
+      .select()
+      .from(schema.users)
+      .where(eq(schema.users.email, email));
+
+    const currentUser = user[0];
+    // Check if user exists and has admin role
+    if (currentUser && currentUser.role === "admin") {
+      next();
+    } else {
+      return res.status(403).json({ message: "Forbidden: Not an admin" });
+    }
+  } catch (error) {
+    console.error("Error in isAdmin middleware:", error);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
 };

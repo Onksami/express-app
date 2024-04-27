@@ -35,8 +35,17 @@ exports.users = (0, pg_core_1.pgTable)("users", {
     id: (0, pg_core_1.uuid)("id").notNull().primaryKey().defaultRandom(),
     firstName: (0, pg_core_1.text)("firstName"),
     lastName: (0, pg_core_1.text)("lastName"),
+    age: (0, pg_core_1.text)("age"),
     password: (0, pg_core_1.text)("password").notNull(),
     email: (0, pg_core_1.text)("email").notNull(),
     role: (0, pg_core_1.text)("role").default("user"),
+    country: (0, pg_core_1.text)("country"),
+    city: (0, pg_core_1.text)("city"),
+    phone: (0, pg_core_1.text)("phone"),
+    status: (0, pg_core_1.text)("status").default("active"),
+    company: (0, pg_core_1.text)("company"),
+    profession: (0, pg_core_1.text)("profession"),
+    createdAt: (0, pg_core_1.timestamp)("createdAt").defaultNow(),
+    updatedAt: (0, pg_core_1.timestamp)("updatedAt").defaultNow(),
 });
 //# sourceMappingURL=schema.js.map

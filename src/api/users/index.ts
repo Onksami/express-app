@@ -6,26 +6,12 @@ import { eq } from "drizzle-orm";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import { genUniqId } from "../../utils/common";
-import { verifyToken } from "../../middlewares";
+import { isAdmin, verifyToken } from "../../middlewares";
 
 let clients: any = [];
 let newUser: any = [];
 
 const router = Router();
-
-router.get("/", async (req, res) => {
-  // #swagger.tags = ['Users']
-  const users = await dbClient().select().from(schema.users);
-
-  if (!users) {
-    res.status(400);
-    throw new Error("users not found");
-  }
-
-  res.json({
-    data: users,
-  });
-});
 
 // router.get("/:id", async (req, res, next) => {
 //   // #swagger.tags = ['Users']
@@ -46,28 +32,6 @@ router.get("/", async (req, res) => {
 //     return next(err);
 //   }
 // });
-router.get("/account", verifyToken, async (req, res, next) => {
-  // #swagger.tags = ['Users']
-  const decoded = req.decoded;
-  const email = decoded?.email!;
-
-  // return res.json({ data: "ok" });
-
-  try {
-    const user = await dbClient()
-      .select()
-      .from(schema.users)
-      .where(eq(schema.users.email, email));
-
-    const { password, ...userData } = user[0];
-    res.json({
-      data: userData,
-    });
-  } catch (err) {
-    res.status(500);
-    return next(err);
-  }
-});
 
 router.post("/sign-up", async (req, res, next) => {
   // #swagger.tags = ['Auth']
@@ -142,9 +106,47 @@ router.post("/sign-in", async (req, res, next) => {
   }
 });
 
-router.put("/:id", async (req, res, next) => {
+router.get("/", verifyToken, isAdmin, async (req, res) => {
   // #swagger.tags = ['Users']
-  const { id } = req.params;
+  const users = await dbClient().select().from(schema.users);
+
+  if (!users) {
+    res.status(400);
+    throw new Error("users not found");
+  }
+
+  res.json({
+    data: users,
+  });
+});
+
+router.get("/account", verifyToken, async (req, res, next) => {
+  // #swagger.tags = ['Users']
+  const decoded = req.decoded;
+  const email = decoded?.email!;
+
+  // return res.json({ data: "ok" });
+
+  try {
+    const user = await dbClient()
+      .select()
+      .from(schema.users)
+      .where(eq(schema.users.email, email));
+
+    const { password, ...userData } = user[0];
+
+    res.json({
+      data: userData,
+    });
+  } catch (err) {
+    res.status(500);
+    return next(err);
+  }
+});
+router.put("/", verifyToken, async (req, res, next) => {
+  // #swagger.tags = ['Users']
+  const decoded = req.decoded;
+  const email = decoded?.email!;
   const { firstName, lastName } = req.body;
 
   try {
@@ -154,13 +156,13 @@ router.put("/:id", async (req, res, next) => {
         firstName,
         lastName,
       })
-      .where(eq(schema.users.id, id))
+      .where(eq(schema.users.email, email))
       .returning({
         id: schema.users.id,
       });
 
     res.json({
-      data: user,
+      message: "user updated",
     });
   } catch (err) {
     res.status(500);
@@ -168,7 +170,7 @@ router.put("/:id", async (req, res, next) => {
   }
 });
 
-router.delete("/:id", async (req, res, next) => {
+router.delete("/:id", verifyToken, isAdmin, async (req, res, next) => {
   // #swagger.tags = ['Users']
   const { id } = req.params;
 
