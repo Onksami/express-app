@@ -34,6 +34,7 @@ const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const common_1 = require("../../utils/common");
 const middlewares_1 = require("../../middlewares");
+const pagination_1 = require("../../utils/pagination");
 let clients = [];
 let newUser = [];
 const router = (0, express_1.Router)();
@@ -121,13 +122,31 @@ router.post("/sign-in", async (req, res, next) => {
 });
 router.get("/", middlewares_1.verifyToken, middlewares_1.isAdmin, async (req, res) => {
     // #swagger.tags = ['Users']
-    const users = await (0, db_client_1.default)().select().from(schema.users);
-    if (!users) {
-        res.status(400);
-        throw new Error("users not found");
+    let page = 1;
+    let limit = 20;
+    if (req.query.page) {
+        page = parseInt(req.query.page);
     }
+    if (req.query.limit) {
+        limit = parseInt(req.query.limit);
+        if (limit < 20) {
+            limit = 20;
+        }
+    }
+    const total = await (0, db_client_1.default)()
+        .select({
+        count: (0, drizzle_orm_1.sql) `count(*)`.mapWith(Number),
+    })
+        .from(schema.users);
+    const metadata = (0, pagination_1.calculatePaginationMetadata)(total[0].count, page, limit);
+    const users = await (0, db_client_1.default)()
+        .select()
+        .from(schema.users)
+        .limit(limit)
+        .offset((page - 1) * limit);
     res.json({
         data: users,
+        metadata,
     });
 });
 router.get("/account", middlewares_1.verifyToken, async (req, res, next) => {

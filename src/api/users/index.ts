@@ -2,11 +2,12 @@ import dbClient from "../../db/db-client";
 import { Response, Router } from "express";
 
 import * as schema from "../../db/schema";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import { genUniqId } from "../../utils/common";
 import { isAdmin, verifyToken } from "../../middlewares";
+import { calculatePaginationMetadata } from "../../utils/pagination";
 
 let clients: any = [];
 let newUser: any = [];
@@ -108,15 +109,36 @@ router.post("/sign-in", async (req, res, next) => {
 
 router.get("/", verifyToken, isAdmin, async (req, res) => {
   // #swagger.tags = ['Users']
-  const users = await dbClient().select().from(schema.users);
 
-  if (!users) {
-    res.status(400);
-    throw new Error("users not found");
+  let page = 1;
+  let limit = 20;
+  if (req.query.page) {
+    page = parseInt(req.query.page as string);
   }
+
+  if (req.query.limit) {
+    limit = parseInt(req.query.limit as string);
+    if (limit < 20) {
+      limit = 20;
+    }
+  }
+  const total = await dbClient()
+    .select({
+      count: sql`count(*)`.mapWith(Number),
+    })
+    .from(schema.users);
+
+  const metadata = calculatePaginationMetadata(total[0].count, page, limit);
+
+  const users = await dbClient()
+    .select()
+    .from(schema.users)
+    .limit(limit)
+    .offset((page - 1) * limit);
 
   res.json({
     data: users,
+    metadata,
   });
 });
 
