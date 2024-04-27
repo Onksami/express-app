@@ -37,5 +37,6 @@ exports.users = (0, pg_core_1.pgTable)("users", {
     lastName: (0, pg_core_1.text)("lastName"),
     password: (0, pg_core_1.text)("password").notNull(),
     email: (0, pg_core_1.text)("email").notNull(),
+    role: (0, pg_core_1.text)("role").default("user"),
 });
 //# sourceMappingURL=schema.js.map
